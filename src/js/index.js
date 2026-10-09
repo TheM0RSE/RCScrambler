@@ -10,7 +10,6 @@ let animationFrameId = null
 
 function startTimer() {
     timeElapsed = 0
-    startTime = performance.now()
     animationFrameId = requestAnimationFrame(updateTimer)
 }
 
@@ -33,15 +32,19 @@ function updateTimer() {
 }
 
 function formatTime(time) {
+    // If time passed is 0 (reset time)
+    if (time == 0) {
+        return "00:00.00"
+    }
     // Convert milliseconds into minutes, seconds and milliseconds
     const minutes = Math.floor(elapsedTime / 60000)
     const seconds = Math.floor((elapsedTime % 60000) / 1000)
     const milliseconds = elapsedTime % 1000
 
-    // Formating each unit of time to two digits
+    // Formating each unit of time to minimum two digits
     const paddedMinutes = String(minutes).padStart(2, '0')
     const paddedSeconds = String(seconds).padStart(2, '0')
-    const paddedMilliseconds = String(Math.trunc(milliseconds/10)).padStart(2, '0')
+    const paddedMilliseconds = String(Math.trunc(milliseconds/10)).padStart(2, '0') // Milliseconds divied by 10 to keep it at max 2 digits.
 
     return `${paddedMinutes}:${paddedSeconds}.${paddedMilliseconds}`
 }
@@ -51,6 +54,7 @@ window.addEventListener("keydown", function(event) {
         if (timeShown) { // If there is a final time shown, ready up the timer
             timeShown = false
             holdTimer = true
+            timerDisplay.textContent = formatTime(0) // Reset HTML-timer to 0
             timerDisplay.classList.add("ready-timer")
         } else if (timerOn) { // If the timer is running, stop the timer.
             elapsedTime = performance.now() - startTime // Calculate the time as fast as possible
@@ -62,9 +66,10 @@ window.addEventListener("keydown", function(event) {
 });
 
 window.addEventListener("keyup", function(event) {
-    if (event.code === "Space") {
+    if (event.code === "Space") { // If spacebar is released
         holdTimer = false
-        if (!timerOn && !timeShown) {
+        if (!timerOn && !timeShown) { // If the timer isn't on and there is not a final time shown, start timer
+            startTime = performance.now() // Set start offset as fast as possible
             timerOn = true
             timerDisplay.classList.remove("ready-timer")
             startTimer()
