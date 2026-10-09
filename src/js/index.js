@@ -1,0 +1,73 @@
+const timerDisplay = document.getElementById("timer") // HTML-element for the timer
+
+let holdTimer = false // When holding spacebar to start timer
+let timerOn = false // When timer is running
+let timeShown = true // When final time is shown
+
+let elapsedTime = 0 // Time on the clock in ms
+let startTime = 0 // Offset for calculating elapsed time
+let animationFrameId = null
+
+function startTimer() {
+    timeElapsed = 0
+    startTime = performance.now()
+    animationFrameId = requestAnimationFrame(updateTimer)
+}
+
+function stopTimer() {
+    cancelAnimationFrame(animationFrameId)
+    timerDisplay.textContent = formatTime(elapsedTime)
+}
+
+function updateTimer() {
+    // Calculate the time from startTime to the time now
+    elapsedTime = performance.now() - startTime
+
+    // Display formated time to HTML-element
+    timerDisplay.textContent = formatTime(elapsedTime)
+
+    // If timer is still on, continue to loop updateTimer on each anim-frame
+    if (timerOn) {
+        animationFrameId = requestAnimationFrame(updateTimer)
+    }
+}
+
+function formatTime(time) {
+    // Convert milliseconds into minutes, seconds and milliseconds
+    const minutes = Math.floor(elapsedTime / 60000)
+    const seconds = Math.floor((elapsedTime % 60000) / 1000)
+    const milliseconds = elapsedTime % 1000
+
+    // Formating each unit of time to two digits
+    const paddedMinutes = String(minutes).padStart(2, '0')
+    const paddedSeconds = String(seconds).padStart(2, '0')
+    const paddedMilliseconds = String(Math.trunc(milliseconds/10)).padStart(2, '0')
+
+    return `${paddedMinutes}:${paddedSeconds}.${paddedMilliseconds}`
+}
+
+window.addEventListener("keydown", function(event) {
+    if (event.code === "Space" && !event.repeat) { // If spacebar is pressed (and not held)
+        if (timeShown) { // If there is a final time shown, ready up the timer
+            timeShown = false
+            holdTimer = true
+            timerDisplay.classList.add("ready-timer")
+        } else if (timerOn) { // If the timer is running, stop the timer.
+            elapsedTime = performance.now() - startTime // Calculate the time as fast as possible
+            timerOn = false
+            timeShown = true
+            stopTimer()
+        }
+    }
+});
+
+window.addEventListener("keyup", function(event) {
+    if (event.code === "Space") {
+        holdTimer = false
+        if (!timerOn && !timeShown) {
+            timerOn = true
+            timerDisplay.classList.remove("ready-timer")
+            startTimer()
+        }
+    }
+});
