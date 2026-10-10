@@ -1,4 +1,5 @@
 const timerDisplay = document.getElementById("timer") // HTML-element for the timer
+const topBar = document.getElementById("topbar") // HTML-element for the topbar
 
 let holdTimer = false // When holding spacebar to start timer
 let timerOn = false // When timer is running
@@ -56,10 +57,12 @@ window.addEventListener("keydown", function(event) {
             holdTimer = true
             timerDisplay.textContent = formatTime(0) // Reset HTML-timer to 0
             timerDisplay.classList.add("ready-timer")
+            topBar.classList.add("hide") // Hide topbar
         } else if (timerOn) { // If the timer is running, stop the timer.
             elapsedTime = performance.now() - startTime // Calculate the time as fast as possible
             timerOn = false
             timeShown = true
+            topBar.classList.remove("hide") // Show topbar
             stopTimer()
         }
     }
